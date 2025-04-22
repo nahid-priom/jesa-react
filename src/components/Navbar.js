@@ -4,48 +4,27 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faBars,
   faTimes,
-  faChevronDown,
+  faEnvelope,
+  faPhone,
+  faUser,
 } from "@fortawesome/free-solid-svg-icons";
-
-import axios from "axios";
 
 import logo from "../assets/logo.png";
 
 export const navLinks = [
-  { id: "service", title: "Services" },
-  { id: "about", title: "About" },
-  { id: "blog", title: "Blogs" },
-  { id: "contact", title: "Contact" },
+  { id: "about-us", title: "ABOUT US" },
+  { id: "programes-events", title: "PROGRAM & EVENTS" },
+  { id: "members-portal", title: "MEMBERS PORTAL" },
+  { id: "alumni-stories", title: "ALUMNI STORIES" },
+  { id: "career-oppurtunity", title: "CAREER OPPURTUNITY" },
+  { id: "memberships", title: "MEMBERSHIP" },
 ];
 
 const Navbar = () => {
-  const [categories, setCategories] = useState([]);
   const location = useLocation();
   const [active, setActive] = useState("");
   const [toggle, setToggle] = useState(false);
-  const [serviceDropdownOpen, setServiceDropdownOpen] = useState(false);
   const [navbarShadow, setNavbarShadow] = useState(false);
-
-  useEffect(() => {
-    const fetchCategories = async () => {
-      try {
-        const response = await axios.get("https://backend.phonespotmd.com/api");
-
-        const fetchedCategories = response.data.categories.map((category) => ({
-          name: category.name,
-          slug: category.slug,
-          image: `https://backend.phonespotmd.com/${category.image}`,
-          shortDescription: category.short_description,
-        }));
-
-        setCategories(fetchedCategories);
-      } catch (error) {
-        console.error("Error fetching categories:", error);
-      }
-    };
-
-    fetchCategories();
-  }, []);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -71,168 +50,158 @@ const Navbar = () => {
   }, [location]);
 
   return (
-    <section>
+    <section className="relative">
+      {/* Top Header */}
+      <div className="bg-[#770504] text-white py-2 px-4">
+        <div className="container mx-auto flex flex-col md:flex-row justify-between">
+          <div className="flex justify-between lg:space-x-8 text-sm">
+            <div className="flex items-center">
+              <FontAwesomeIcon icon={faEnvelope} className="mr-2" />
+              <span>info@example.com</span>
+            </div>
+            <div className="flex items-center">
+              <FontAwesomeIcon icon={faPhone} className="mr-2" />
+              <span>+1 (123) 456-7890</span>
+            </div>
+          </div>
+          <div className="hidden lg:flex space-x-2">
+            <button className="px-2 py-1 text-xs bg-transparent border border-white rounded hover:bg-white hover:text-[#770504] transition-colors duration-300">
+              <FontAwesomeIcon icon={faUser} className="mr-1" />
+              Log In
+            </button>
+            <button className="px-2 py-1 text-xs bg-white text-[#770504] rounded hover:bg-[#770504] hover:text-white hover:border hover:border-white transition-colors duration-300">
+              Sign Up
+            </button>
+          </div>
+        </div>
+      </div>
+
       {/* Main Navbar */}
       <nav
-        className={`fixed top-0 left-0 right-0 z-50  transition-all duration-300 ${
-          navbarShadow ? "pt-4 lg:pt-0 shadow-2xl bg-[#003649]" : ""
+        className={`relative top-0 left-0 right-0 z-40 transition-all duration-300 ${
+          navbarShadow ? "shadow-md bg-white" : "bg-white"
         }`}
       >
-        <div className="container bg-transparent px-4 lg:px-0 mx-auto flex py-3 justify-between items-center">
-          <Link to={"/"}>
-            <img
-              src={logo}
-              alt="Logo"
-              className="w-[120px] h-[60px] lg:w-[200px] lg:h-[100px]"
-            />
-          </Link>
-
-          <ul className="list-none sm:flex hidden justify-center items-center">
-            {navLinks.map((nav, index) => (
-              <li
-                key={nav.id}
-                className={`font-poppins font-bold cursor-pointer text-[16px] relative ${
-                  active === nav.title ? "text-purple-600" : "text-gray-100"
-                } ${index === navLinks.length - 1 ? "mr-0" : "mr-10"}`}
-                onMouseEnter={() =>
-                  nav.id === "service" && setServiceDropdownOpen(true)
-                }
-                onMouseLeave={() =>
-                  nav.id === "service" && setServiceDropdownOpen(false)
-                }
-                onClick={() => setActive(nav.title)}
-              >
-                <Link
-                  className="text-lg relative hover:text-purple-600 transition-all duration-300"
-                  to={`/${nav.id}`}
-                >
-                  {nav.title}
-                  {nav.id === "service" && (
-                    <FontAwesomeIcon
-                      icon={faChevronDown}
-                      className="ml-2 transition-transform duration-300"
-                    />
-                  )}
-                  {active === nav.title && (
-                    <span className="absolute bottom-[-2px] left-0 w-full h-[2px] bg-purple-600 animate-underline"></span>
-                  )}
-                </Link>
-                {nav.id === "service" && serviceDropdownOpen && (
-                  <ul className="absolute top-full left-0 w-48 bg-white shadow-lg rounded-md z-10 overflow-hidden">
-                    {categories.map((category) => (
-                      <li
-                        key={category.name}
-                        className="relative hover:bg-purple-600 border-b border-purple-100 p-4 hover:text-white transition-all duration-300"
-                      >
-                        <Link
-                          to={`/service/${category.slug}`}
-                          className="flex items-center w-full"
-                        >
-                          <img
-                            src={category.image}
-                            alt={category.name}
-                            className="w-8 h-8 mr-2 rounded-full"
-                          />
-                          <span className="text-gray-800 hover:text-white transition-all duration-300">
-                            {category.name}
-                          </span>
-                        </Link>
-                      </li>
-                    ))}
-                  </ul>
-                )}
-              </li>
-            ))}
-          </ul>
-          <Link
-            to="/service"
-            className="bg-[#FFAB5B] px-6 py-2 rounded-lg text-lg font-bold hover:text-black hover:bg-[#F6F8D5] transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl"
-          >
-            Repair Now
-          </Link>
-          {/* Sidebar for mobile */}
-          <div className="sm:hidden flex justify-end items-center">
-            <FontAwesomeIcon
-              icon={toggle ? faTimes : faBars}
-              className="w-[28px] h-[28px] pr-4 text-black cursor-pointer"
+        <div className="container mx-auto px-4 lg:px-0 flex items-center justify-between h-12 lg:h-16">
+          {/* Mobile Menu Button (Left) */}
+          <div className="lg:hidden flex items-center">
+            <button 
+              className="flex items-center text-[#770504]"
               onClick={() => setToggle((prev) => !prev)}
-            />
-            <div
-              className={`fixed top-0 right-0 h-full w-[250px] rounded-bl-2xl bg-black p-6 z-50 transition-transform duration-300 ${
-                toggle ? "translate-x-0" : "translate-x-full"
-              }`}
             >
-              <div className="absolute top-6 right-6">
-                <FontAwesomeIcon
-                  icon={faTimes}
-                  className="w-[32px] h-[32px] text-white cursor-pointer"
-                  onClick={() => setToggle(false)}
-                />
-              </div>
-              <ul className="list-none flex flex-col justify-start items-center h-auto space-y-6 mt-20">
-                {navLinks.map((nav) => (
-                  <li
-                    key={nav.id}
-                    className={`font-poppins font-medium cursor-pointer text-[18px] relative ${
-                      active === nav.title ? "text-red-500" : "text-dimWhite"
-                    }`}
-                    onClick={() => {
-                      if (nav.id === "service") {
-                        setServiceDropdownOpen((prev) => !prev);
-                      } else {
-                        setActive(nav.title);
-                        setToggle(false);
-                      }
-                    }}
+              <FontAwesomeIcon
+                icon={toggle ? faTimes : faBars}
+                className="w-5 h-5"
+              />
+              <span className="ml-2 font-medium">MENU</span>
+            </button>
+          </div>
+
+          {/* Centered Logo */}
+          <div className="absolute left-1/2 transform -translate-x-1/2 -translate-y-1/2 top-1/2 z-50">
+            <Link to={"/"}>
+              <img
+                src={logo}
+                alt="Logo"
+                className="w-[80px] h-[80px] lg:w-[180px] lg:h-[160px]"
+              />
+            </Link>
+          </div>
+
+          {/* Mobile Login Button (Right) */}
+          <div className="lg:hidden flex items-center">
+            <button className="px-3 py-1 text-xs bg-[#770504] text-white rounded flex items-center">
+              <FontAwesomeIcon icon={faUser} className="mr-1" />
+              LOGIN
+            </button>
+          </div>
+
+          {/* Left Navigation Items (First 3) - Desktop */}
+          <div className="hidden lg:flex items-center justify-start flex-1 pr-16">
+            <ul className="flex space-x-8">
+              {navLinks.slice(0, 3).map((nav) => (
+                <li
+                  key={nav.id}
+                  className={`relative py-2 ${
+                    active === nav.title ? "text-[#770504]" : "text-[#770504]"
+                  }`}
+                  onClick={() => setActive(nav.title)}
+                >
+                  <Link
+                    className="px-2 py-1 text-sm font-medium hover:text-[#770504]/80 transition-colors duration-300"
+                    to={`/${nav.id}`}
                   >
-                    <Link
-                      to={nav.id === "service" ? "#" : `/${nav.id}`}
-                      className="relative text-xl flex items-center"
-                      onClick={() => nav.id !== "service" && setToggle(false)}
-                    >
-                      {nav.title}
-                      {nav.id === "service" && (
-                        <FontAwesomeIcon
-                          icon={faChevronDown}
-                          className="ml-2"
-                        />
-                      )}
-                      {active === nav.title && (
-                        <span className="absolute -bottom-2 left-0 w-full h-[3px] bg-white"></span>
-                      )}
-                    </Link>
-                    {nav.id === "service" && serviceDropdownOpen && (
-                      <ul className="ml-4 bg-white p-2 rounded-xl hover:bg-red-500 mt-2">
-                        {categories.map((category) => (
-                          <li
-                            key={category.name}
-                            className="flex items-center py-2 border-b border-red-400 cursor-pointer"
-                          >
-                            <Link
-                              to={`/service/${category.slug}`}
-                              className="flex items-center w-full"
-                              onClick={() => {
-                                setToggle(false);
-                                setServiceDropdownOpen(false);
-                              }}
-                            >
-                              <img
-                                src={category.image}
-                                alt={category.name}
-                                className="w-8 h-8 mr-2"
-                              />
-                              <span className="text-black hover:text-white w-full p-1 rounded">
-                                {category.name}
-                              </span>
-                            </Link>
-                          </li>
-                        ))}
-                      </ul>
-                    )}
-                  </li>
-                ))}
-              </ul>
+                    {nav.title}
+                  </Link>
+                  {active === nav.title && (
+                    <span className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-4/5 h-0.5 bg-[#770504]"></span>
+                  )}
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Right Navigation Items (Last 3) - Desktop */}
+          <div className="hidden lg:flex items-center justify-end flex-1 pl-16">
+            <ul className="flex space-x-8">
+              {navLinks.slice(3, 6).map((nav) => (
+                <li
+                  key={nav.id}
+                  className={`relative py-2 ${
+                    active === nav.title ? "text-[#770504]" : "text-[#770504]"
+                  }`}
+                  onClick={() => setActive(nav.title)}
+                >
+                  <Link
+                    className="px-2 py-1 text-sm font-medium hover:text-[#770504]/80 transition-colors duration-300"
+                    to={`/${nav.id}`}
+                  >
+                    {nav.title}
+                  </Link>
+                  {active === nav.title && (
+                    <span className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-4/5 h-0.5 bg-[#770504]"></span>
+                  )}
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Mobile Menu Panel */}
+          <div
+            className={`lg:hidden fixed top-0 left-0 h-full w-64 bg-white shadow-xl z-50 transition-transform duration-300 ease-in-out ${
+              toggle ? "translate-x-0" : "-translate-x-full"
+            }`}
+          >
+            <div className="flex justify-between items-center p-4 border-b">
+              <div className="text-lg font-bold text-[#770504]">Menu</div>
+              <button 
+                onClick={() => setToggle(false)}
+                className="text-[#770504]"
+              >
+                <FontAwesomeIcon icon={faTimes} className="w-5 h-5" />
+              </button>
             </div>
+            <ul className="px-4 py-8 space-y-4 overflow-y-auto max-h-[calc(100vh-80px)]">
+              {navLinks.map((nav) => (
+                <li
+                  key={nav.id}
+                  className={`${
+                    active === nav.title ? "text-[#770504]" : "text-gray-700"
+                  }`}
+                  onClick={() => {
+                    setActive(nav.title);
+                    setToggle(false);
+                  }}
+                >
+                  <Link
+                    to={`/${nav.id}`}
+                    className="flex items-center justify-between py-2 px-3 rounded hover:bg-[#770504]/10 transition-colors duration-300"
+                  >
+                    <span className="font-medium">{nav.title}</span>
+                  </Link>
+                </li>
+              ))}
+            </ul>
           </div>
         </div>
       </nav>
