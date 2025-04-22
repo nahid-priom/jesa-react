@@ -2,7 +2,8 @@ import React, { Suspense, lazy } from "react";
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 import ScrollToTop from "./components/ScrollToTop";
 import { HelmetProvider } from "react-helmet-async";
-import FloatingCallButton from "./components/FloatingCall";
+
+import Logo from "./assets/logo.png";
 
 const Home = lazy(() => import("./pages/Home"));
 const Blog = lazy(() => import("./pages/Blog"));
@@ -20,9 +21,19 @@ const ClearCache = lazy(() => import("./components/ClearCache"));
 const LoadingFallback = ({ children }) => (
   <Suspense
     fallback={
-      <div className="flex justify-center items-center w-full h-screen">
-        <div className="spinner-border animate-spin inline-block w-8 h-8 border-4 rounded-full text-red-600"></div>
-        <p className="ml-4 text-blue-600">Loading...</p>
+      <div 
+        className="flex flex-col justify-center bg-[#770504] items-center w-full h-screen"
+        
+      >
+        <img 
+          src={Logo} 
+          alt="Logo" 
+          className="w-60 h-56 mb-4 animate-pulse"
+        />
+        <div className="flex items-center">
+          <div className="spinner-border animate-spin inline-block w-8 h-8 border-4 rounded-full text-white border-t-transparent"></div>
+          <p className="ml-4 text-white font-medium">Loading...</p>
+        </div>
       </div>
     }
   >
@@ -55,7 +66,6 @@ const App = () => (
         </Routes>
       </LoadingFallback>
     </Router>
-    <FloatingCallButton />
   </HelmetProvider>
 );
 

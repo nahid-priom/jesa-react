@@ -11,7 +11,7 @@ const Footer = () => {
           <div className="mb-6">
             <h3 className="text-xl font-bold mb-4 text-[#FFD700]">About Us</h3>
             <p className="mb-4">
-              The Alumni Association connects graduates, supports current students, and strengthens our school community.
+              The Jhenaidah Ex-student Association (JESA) connects graduates, supports current students, and strengthens our school community.
             </p>
             <div className="flex space-x-4">
               <a href="#" className="text-white hover:text-[#FFD700] transition-colors">
@@ -97,7 +97,7 @@ const Footer = () => {
         {/* Copyright */}
         <div className="border-t border-[#FFD700]/20 pt-6 text-center">
           <p>
-            &copy; {new Date().getFullYear()} Alumni Association. All Rights Reserved.
+            &copy; {new Date().getFullYear()} Jhenaidah Ex-student Association (JESA). All Rights Reserved.
           </p>
           <div className="flex justify-center space-x-4 mt-2">
             <Link to="/privacy-policy" className="hover:text-[#FFD700] transition-colors">Privacy Policy</Link>
