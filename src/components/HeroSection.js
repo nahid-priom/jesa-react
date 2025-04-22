@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import bgImage from "../assets/bgImage.png";
 import ifter1 from "../assets/ifter.jpg";
 import meeting1 from "../assets/meeting.jpg";
@@ -8,7 +8,13 @@ import event1 from "../assets/event.png";
 
 const HeroSection = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
+  const [touchStart, setTouchStart] = useState(null);
+  const [touchEnd, setTouchEnd] = useState(null);
+  const sliderRef = useRef(null);
   
+  // Minimum swipe distance
+  const minSwipeDistance = 50;
+
   const events = [
     {
       id: 1,
@@ -39,6 +45,29 @@ const HeroSection = () => {
     }
   ];
 
+  // Handle touch events for swipe
+  const onTouchStart = (e) => {
+    setTouchEnd(null);
+    setTouchStart(e.targetTouches[0].clientX);
+  };
+
+  const onTouchMove = (e) => {
+    setTouchEnd(e.targetTouches[0].clientX);
+  };
+
+  const onTouchEnd = () => {
+    if (!touchStart || !touchEnd) return;
+    const distance = touchStart - touchEnd;
+    const isLeftSwipe = distance > minSwipeDistance;
+    const isRightSwipe = distance < -minSwipeDistance;
+
+    if (isLeftSwipe) {
+      setCurrentSlide((prev) => (prev + 1) % events.length);
+    } else if (isRightSwipe) {
+      setCurrentSlide((prev) => (prev - 1 + events.length) % events.length);
+    }
+  };
+
   // Auto slide change
   useEffect(() => {
     const interval = setInterval(() => {
@@ -49,39 +78,42 @@ const HeroSection = () => {
 
   return (
     <section 
-      className="relative py-12 md:py-24 overflow-hidden"
+      className="relative overflow-hidden min-h-[650px] md:min-h-[700px] flex items-center"
       style={{
-        backgroundImage: `url(${bgImage})`, 
+        backgroundImage: ` url(${bgImage})`,
         backgroundSize: "cover",
         backgroundPosition: "center",
         backgroundRepeat: "no-repeat",
       }}
     >
-      <div className="container mx-auto px-4 flex flex-col lg:flex-row items-center gap-8">
+      <div className="container mx-auto px-4 flex flex-col lg:flex-row items-center gap-8 py-12 md:py-16">
         {/* Text Content */}
         <div className="lg:w-1/2 space-y-6 text-center lg:text-left">
-          <motion.div
-            key={currentSlide}
-            initial={{ opacity: 0, x: -50 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.5 }}
-          >
-            <p className="text-lg md:text-xl text-[#FFD700] font-medium">
-              {events[currentSlide].subtitle}
-            </p>
-            <h1 className="text-3xl md:text-5xl font-bold text-white mb-4">
-              {events[currentSlide].title}
-            </h1>
-            <p className="text-gray-200 text-lg mb-6">
-              {events[currentSlide].description}
-            </p>
-          </motion.div>
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={currentSlide}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              transition={{ duration: 0.5 }}
+            >
+              <p className="text-lg md:text-xl text-[#FFD700] font-medium">
+                {events[currentSlide].subtitle}
+              </p>
+              <h1 className="text-3xl md:text-5xl font-bold text-white mb-4">
+                {events[currentSlide].title}
+              </h1>
+              <p className="text-gray-200 text-lg mb-6">
+                {events[currentSlide].description}
+              </p>
+            </motion.div>
+          </AnimatePresence>
 
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.3 }}
-            className="flex  gap-4 justify-center lg:justify-start"
+            className="flex gap-4 justify-center lg:justify-start"
           >
             <Link
               to={events[currentSlide].link}
@@ -99,28 +131,38 @@ const HeroSection = () => {
         </div>
 
         {/* Image Slider */}
-        <div className="lg:w-1/2 relative">
-          <motion.div
-            key={currentSlide}
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.5 }}
-            className="rounded-xl overflow-hidden shadow-2xl"
-          >
-            <img 
-              src={events[currentSlide].image} 
-              alt={events[currentSlide].title}
-              className="w-full h-auto max-h-96 object-cover"
-            />
-          </motion.div>
+        <div 
+          className="lg:w-1/2 relative h-[300px] md:h-[400px] w-full"
+          ref={sliderRef}
+          onTouchStart={onTouchStart}
+          onTouchMove={onTouchMove}
+          onTouchEnd={onTouchEnd}
+        >
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={currentSlide}
+              initial={{ opacity: 0, x: 100 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -100 }}
+              transition={{ duration: 0.5 }}
+              className="absolute inset-0 rounded-xl overflow-hidden shadow-2xl"
+            >
+              <img 
+                src={events[currentSlide].image} 
+                alt={events[currentSlide].title}
+                className="w-full h-full object-cover"
+                loading="lazy"
+              />
+            </motion.div>
+          </AnimatePresence>
           
           {/* Slide Indicators */}
-          <div className="flex justify-center mt-6 space-x-2">
+          <div className="flex justify-center mt-6 space-x-2 absolute -bottom-6 left-0 right-0">
             {events.map((_, index) => (
               <button
                 key={index}
                 onClick={() => setCurrentSlide(index)}
-                className={`w-3 h-3 rounded-full ${currentSlide === index ? 'bg-[#FFD700]' : 'bg-gray-300'}`}
+                className={`w-3 h-3 rounded-full transition-all duration-300 ${currentSlide === index ? 'bg-[#FFD700] w-6' : 'bg-gray-300'}`}
                 aria-label={`Go to slide ${index + 1}`}
               />
             ))}
@@ -128,12 +170,7 @@ const HeroSection = () => {
         </div>
       </div>
 
-      {/* Animated decorative elements */}
-      <motion.div 
-        className="absolute bottom-0 left-0 w-full h-16 bg-gradient-to-t from-black to-transparent"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-      />
+     
     </section>
   );
 };
