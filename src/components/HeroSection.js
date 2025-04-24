@@ -10,9 +10,9 @@ const HeroSection = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [touchStart, setTouchStart] = useState(null);
   const [touchEnd, setTouchEnd] = useState(null);
+  const [isAnimating, setIsAnimating] = useState(false);
   const sliderRef = useRef(null);
   
-  // Minimum swipe distance
   const minSwipeDistance = 50;
 
   const events = [
@@ -45,42 +45,60 @@ const HeroSection = () => {
     }
   ];
 
-  // Handle touch events for swipe
+  const goToNextSlide = () => {
+    if (isAnimating) return;
+    setIsAnimating(true);
+    setCurrentSlide((prev) => (prev + 1) % events.length);
+  };
+
+  const goToPrevSlide = () => {
+    if (isAnimating) return;
+    setIsAnimating(true);
+    setCurrentSlide((prev) => (prev - 1 + events.length) % events.length);
+  };
+
+  const goToSlide = (index) => {
+    if (isAnimating || currentSlide === index) return;
+    setIsAnimating(true);
+    setCurrentSlide(index);
+  };
+
   const onTouchStart = (e) => {
+    if (isAnimating) return;
     setTouchEnd(null);
     setTouchStart(e.targetTouches[0].clientX);
   };
 
   const onTouchMove = (e) => {
+    if (!touchStart || isAnimating) return;
     setTouchEnd(e.targetTouches[0].clientX);
   };
 
   const onTouchEnd = () => {
-    if (!touchStart || !touchEnd) return;
+    if (!touchStart || !touchEnd || isAnimating) return;
     const distance = touchStart - touchEnd;
     const isLeftSwipe = distance > minSwipeDistance;
     const isRightSwipe = distance < -minSwipeDistance;
 
     if (isLeftSwipe) {
-      setCurrentSlide((prev) => (prev + 1) % events.length);
+      goToNextSlide();
     } else if (isRightSwipe) {
-      setCurrentSlide((prev) => (prev - 1 + events.length) % events.length);
+      goToPrevSlide();
     }
   };
 
-  // Auto slide change
   useEffect(() => {
     const interval = setInterval(() => {
-      setCurrentSlide((prev) => (prev + 1) % events.length);
+      goToNextSlide();
     }, 5000);
     return () => clearInterval(interval);
-  }, [events.length]);
+  }, [isAnimating]);
 
   return (
     <section 
       className="relative overflow-hidden min-h-[650px] md:min-h-[700px] flex items-center"
       style={{
-        backgroundImage: ` url(${bgImage})`,
+        backgroundImage: `url(${bgImage})`,
         backgroundSize: "cover",
         backgroundPosition: "center",
         backgroundRepeat: "no-repeat",
@@ -89,7 +107,7 @@ const HeroSection = () => {
       <div className="container mx-auto px-4 flex flex-col lg:flex-row items-center gap-8 py-12 md:py-16">
         {/* Text Content */}
         <div className="lg:w-1/2 space-y-6 text-center lg:text-left">
-          <AnimatePresence mode="wait">
+          <AnimatePresence mode="wait" onExitComplete={() => setIsAnimating(false)}>
             <motion.div
               key={currentSlide}
               initial={{ opacity: 0, y: 20 }}
@@ -138,7 +156,7 @@ const HeroSection = () => {
           onTouchMove={onTouchMove}
           onTouchEnd={onTouchEnd}
         >
-          <AnimatePresence mode="wait">
+          <AnimatePresence mode="wait" onExitComplete={() => setIsAnimating(false)}>
             <motion.div
               key={currentSlide}
               initial={{ opacity: 0, x: 100 }}
@@ -161,7 +179,7 @@ const HeroSection = () => {
             {events.map((_, index) => (
               <button
                 key={index}
-                onClick={() => setCurrentSlide(index)}
+                onClick={() => goToSlide(index)}
                 className={`w-3 h-3 rounded-full transition-all duration-300 ${currentSlide === index ? 'bg-[#FFD700] w-6' : 'bg-gray-300'}`}
                 aria-label={`Go to slide ${index + 1}`}
               />
@@ -169,8 +187,6 @@ const HeroSection = () => {
           </div>
         </div>
       </div>
-
-     
     </section>
   );
 };
